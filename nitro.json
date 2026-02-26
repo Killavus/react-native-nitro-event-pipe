@@ -1,0 +1,17 @@
+{
+  "cxxNamespace": ["nitroeventpipe"],
+  "ios": {
+    "iosModuleName": "NitroEventPipe"
+  },
+  "android": {
+    "androidNamespace": ["nitroeventpipe"],
+    "androidCxxLibName": "nitroeventpipe"
+  },
+  "autolinking": {
+    "NitroEventPipe": {
+      "swift": "NitroEventPipe",
+      "kotlin": "NitroEventPipe"
+    }
+  },
+  "ignorePaths": ["node_modules"]
+}
