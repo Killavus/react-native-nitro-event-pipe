@@ -15,46 +15,41 @@ class NitroEventPipe: HybridNitroEventPipeSpec {
     Accommodation("Meliá Düsseldorf", 51.2312, 6.7772, "77391")
   ]
   
+  override init() {
+    super.init()
+    
+    if let delegate = EventPipeConfig.delegate {
+      delegate.onAccommodationChange = { accomodationMap in
+        for listener in self.listeners {
+          listener(accomodationMap)
+        }
+      }
+    } else {
+      NSLog("CRITICAL: EventPipeConfig delegate not set up before module initialization!")
+    }
+  }
   
   func onAccommodationMapChange(onAccomodationMapChanged: @escaping (AccommodationMap) -> Void) throws {
     listeners.append(onAccomodationMapChanged)
   }
   
   func requestAccommodationMap() throws -> Bool {
-    if !initialized {
-      initialized = true
-      var hotels = Array<Accommodation>()
-      hotels.append(contentsOf: Self.HOTELS.prefix(5))
-      
-      for listener in listeners {
-        listener(AccommodationMap(results: hotels))
-      }
-      
-      return true
+    if let delegate = EventPipeConfig.delegate {
+      return delegate.accommodationMapRequested()
     }
     
     return false
   }
   
   func selectAccommodation(hotelId: String) throws {
-    DispatchQueue.main.async {
-      let alertController = UIAlertController(title: "Accommodation selected", message: "Selected ID: \(hotelId)", preferredStyle: .alert)
-      
-      alertController.addAction(UIAlertAction(title: "OK", style: .default))
-
-      UIApplication.shared.delegate?.window??.rootViewController?.present(alertController, animated: true)
+    if let delegate = EventPipeConfig.delegate {
+      delegate.accommodationSelected(hotelId: hotelId)
     }
   }
   
   func refresh() throws {
-    if initialized {
-      for listener in listeners {
-        listener(AccommodationMap(results: Self.HOTELS))
-      }
-    } else {
-      let alertController = UIAlertController(title: "Caution", message: "Refresh impossible!", preferredStyle: .alert)
-     
-      UIApplication.shared.delegate?.window??.rootViewController?.present(alertController, animated: true)
+    if let delegate = EventPipeConfig.delegate {
+      return delegate.refreshRequested()
     }
   }
 }
